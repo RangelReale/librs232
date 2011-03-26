@@ -30,8 +30,8 @@ else ()
 endif ()
 
 add_library ( librs232 SHARED src/rs232.c ${SRCS} )
-set_target_properties ( librs232 PROPERTIES VERSION ${VERSION} )
-set_target_properties ( librs232 PROPERTIES SOVERSION ${SOVERSION} )
+#unused: set_target_properties ( librs232 PROPERTIES VERSION ${VERSION} )
+#unused: set_target_properties ( librs232 PROPERTIES SOVERSION ${SOVERSION})
 #set_target_properties ( librs232 PROPERTIES LINK_FLAGS -nostartfiles ) # is this really useful, other than saving nine bytes?
 install_library ( librs232 )
 
