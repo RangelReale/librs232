@@ -1,0 +1,14 @@
+--- This file is part of LuaDist project
+
+name = "librs232"
+version = "1.0.1"
+
+desc = "Multiplatform library for serial communications over RS-232 (serial port)"
+author = "Petr Stetiar"
+license = "MIT"
+url = "https://github.com/ynezz/librs232"
+maintainer = "David Manura"
+
+depends = {
+	"lua ~> 5.1" # optional
+}
