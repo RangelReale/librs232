@@ -68,3 +68,7 @@ if ( LUA51_FOUND )
   # This takes way too long to run.
   #add_lua_test ( bindings/lua/test.lua )
 endif ()
+
+install_data ( AUTHORS ChangeLog COPYING TODO )
+install_example ( doc/example.lua )
+
