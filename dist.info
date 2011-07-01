@@ -10,5 +10,5 @@ url = "https://github.com/ynezz/librs232"
 maintainer = "David Manura"
 
 depends = {
-	"lua ~> 5.1" # optional
+	"lua ~> 5.1" -- optional
 }
