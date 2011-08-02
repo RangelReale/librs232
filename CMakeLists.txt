@@ -47,14 +47,14 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug )
 endif ()
 
 # Install package config file (improve?)
-set ( prefix ${CMAKE_INSTALL_PREFIX} )
-set ( exec_prefix \${prefix} )
-set ( libdir \${exec_prefix}/lib )
-set ( includedir \${prefix}/include )
-set ( sysincludedir \${prefix}/include ) # improve?
-set ( LIBS )
-configure_file ( src/librs232.pc.in librs232.pc @ONLY )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/librs232.pc DESTINATION ${INSTALL_LIB}/pkgconfig )
+#set ( prefix ${CMAKE_INSTALL_PREFIX} )
+#set ( exec_prefix \${prefix} )
+#set ( libdir \${exec_prefix}/lib )
+#set ( includedir \${prefix}/include )
+#set ( sysincludedir \${prefix}/include ) # improve?
+#set ( LIBS )
+#configure_file ( src/librs232.pc.in librs232.pc @ONLY )
+#install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/librs232.pc DESTINATION ${INSTALL_LIB}/pkgconfig )
 
 
 # Lua binding (optional)
