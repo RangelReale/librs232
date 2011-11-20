@@ -22,7 +22,7 @@ endif ()
 include_directories ( include )
 #unused: AM_CFLAGS = -Wall -ansi -pedantic -W -Wmissing-prototypes -Wmissing-declarations -Werror -std=gnu99 
 
-if ( WIN32 )
+if ( WIN32 OR CYGWIN )
   set ( SRCS src/rs232_windows.c src/resource.rc )
   add_definitions ( -DRS232_EXPORT )
 else ()
