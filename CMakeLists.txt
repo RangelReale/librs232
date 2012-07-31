@@ -6,10 +6,9 @@
 
 project ( librs232 C )
 cmake_minimum_required ( VERSION 2.6 )
-include ( dist.cmake )
-
+include ( cmake/dist.cmake )
+include ( lua )
 install_header ( include/librs232/rs232.h include/librs232/rs232_linux.h INTO librs232 )
-
 
 # LIBVERSION 0:1:0
 set ( SOVERSION 0 )
@@ -17,7 +16,7 @@ set ( VERSION 0.0.1 )
 
 if ( CMAKE_BUILD_TYPE STREQUAL Debug )
   add_definitions ( -DRS232_DEBUG )
-endif ()
+endif ( )
 
 include_directories ( include )
 #unused: AM_CFLAGS = -Wall -ansi -pedantic -W -Wmissing-prototypes -Wmissing-declarations -Werror -std=gnu99 
@@ -25,26 +24,25 @@ include_directories ( include )
 if ( WIN32 OR CYGWIN )
   set ( SRCS src/rs232_windows.c src/resource.rc )
   add_definitions ( -DRS232_EXPORT )
-else ()
+else ( )
   set ( SRCS src/rs232_linux.c )
-endif ()
+endif ( )
 
-add_library ( librs232 SHARED src/rs232.c ${SRCS} )
+add_library ( librs232 src/rs232.c ${SRCS} )
 #unused: set_target_properties ( librs232 PROPERTIES VERSION ${VERSION} )
 #unused: set_target_properties ( librs232 PROPERTIES SOVERSION ${SOVERSION})
 #set_target_properties ( librs232 PROPERTIES LINK_FLAGS -nostartfiles ) # is this really useful, other than saving nine bytes?
 install_library ( librs232 )
 
-
-if (CMAKE_BUILD_TYPE STREQUAL Debug )
+if ( CMAKE_BUILD_TYPE STREQUAL Debug )
   add_executable ( rs232_test src/rs232_test.c )
   target_link_libraries ( rs232_test librs232 )
   install_executable ( rs232_test )
   if ( NOT SKIP_TESTING )
     include ( CTest )
     #add_test ( run_rs232_test rs232_test ) # fails: file not found
-  endif ()
-endif ()
+  endif ( )
+endif ( )
 
 # Install package config file (improve?)
 #set ( prefix ${CMAKE_INSTALL_PREFIX} )
@@ -56,10 +54,9 @@ endif ()
 #configure_file ( src/librs232.pc.in librs232.pc @ONLY )
 #install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/librs232.pc DESTINATION ${INSTALL_LIB}/pkgconfig )
 
-
 # Lua binding (optional)
-find_package ( Lua51 )
-if ( LUA51_FOUND )
+find_package ( Lua )
+if ( LUA_FOUND )
   install_lua_module ( luars232 bindings/lua/luars232.c src/resource_lua.rc )
   target_link_libraries ( luars232 librs232 )
   set_target_properties ( luars232 PROPERTIES LINK_FLAGS -nostartfiles )
@@ -67,7 +64,7 @@ if ( LUA51_FOUND )
 
   # This takes way too long to run.
   #add_lua_test ( bindings/lua/test.lua )
-endif ()
+endif ( )
 
 install_data ( AUTHORS ChangeLog COPYING TODO )
 install_example ( doc/example.lua )
