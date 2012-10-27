@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
+ * Copyright (c) 2011 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,7 +33,6 @@
 #endif
 
 #include "librs232/rs232.h"
-#include "librs232/rs232_windows.h"
 
 static wchar_t *
 a2w(const char *astr)
@@ -165,8 +164,11 @@ rs232_end(struct rs232_port_t *p)
 
 	DBG("p=%p p->pt=%p\n", (void *)p, p->pt);
 
-	if (!rs232_port_open(p))
+	if (!rs232_port_open(p)) {
+		free(p->pt);
+		free(p);
 		return;
+	}
 
 	rs232_flush(p);
 
@@ -293,7 +295,10 @@ rs232_read_timeout(struct rs232_port_t *p, unsigned char *buf,
 	DBG("read_len=%d hex='%s' ascii='%s'\n", r, rs232_hex_dump(buf, r),
 	    rs232_ascii_dump(buf, r));
 
-	return RS232_ERR_NOERROR;
+	/* TODO - This is lame, since we rely on the fact, that if we read 0 bytes,
+	 * that the read probably timeouted. So we should rather measure the reading
+	 * interval or rework it using overlapped I/O */
+	return *read_len == 0 ? RS232_ERR_TIMEOUT : RS232_ERR_NOERROR;
 }
 
 RS232_LIB unsigned int
@@ -367,7 +372,12 @@ fix_device_name(char *device)
 		s++;
 
 	if (s && (atoi(s) > 0)) {
+		/* meh, Windows CE is special and can't handle URN path, just COM1: format */
+#ifndef UNDER_CE
 		snprintf(ret, RS232_STRLEN_DEVICE, "\\\\.\\COM%s", s);
+#else
+		snprintf(ret, RS232_STRLEN_DEVICE, "COM%s:", s);
+#endif
 		return ret;
 	}
 
@@ -440,6 +450,9 @@ rs232_set_baud(struct rs232_port_t *p, enum rs232_baud_e baud)
 	GET_PORT_STATE(wx->fd, &pdcb);
 
 	switch (baud) {
+	case RS232_BAUD_300:
+		pdcb.BaudRate = CBR_300;
+		break;
 	case RS232_BAUD_2400:
 		pdcb.BaudRate = CBR_2400;
 		break;
@@ -460,6 +473,9 @@ rs232_set_baud(struct rs232_port_t *p, enum rs232_baud_e baud)
 		break;
 	case RS232_BAUD_115200:
 		pdcb.BaudRate = CBR_115200;
+		break;
+	case RS232_BAUD_460800:
+		pdcb.BaudRate = CBR_460800;
 		break;
 	default:
 		return RS232_ERR_UNKNOWN;
@@ -721,4 +737,14 @@ rs232_close(struct rs232_port_t *p)
 	}
 
 	return RS232_ERR_NOERROR;
+}
+
+RS232_LIB unsigned int
+rs232_fd(struct rs232_port_t *p)
+{
+	struct rs232_windows_t *wx = p->pt;
+
+	DBG("p=%p p->pt=%p wx->fd=%d\n", (void *)p, p->pt, wx->fd);
+
+	return (unsigned int) wx->fd;
 }

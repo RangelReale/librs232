@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
+ * Copyright (c) 2011 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -57,10 +57,11 @@ unsigned int rs232_simple_test(void)
 #else
 	rs232_set_device(p, "/dev/ttyUSB0");
 #endif
-	rs232_end(p);
 	ret = rs232_open(p);
-	if (ret)
+	if (ret) {
+		rs232_end(p);
 		return err(ret);
+	}
 
 	rs232_set_baud(p, RS232_BAUD_115200);
 	printf("[*] port settings: %s\n", rs232_to_string(p));

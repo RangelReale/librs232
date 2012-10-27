@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
+ * Copyright (c) 2011 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,23 +31,18 @@
 
 #include "librs232/rs232.h"
 
-#ifdef WIN32
-#include "librs232/rs232_windows.h"
-#else
-#include "librs232/rs232_linux.h"
-#endif
-
 #define MODULE_TIMESTAMP __DATE__ " " __TIME__
 #define MODULE_NAMESPACE "luars232"
-#define MODULE_VERSION "1.0.1"
+#define MODULE_VERSION "1.0.3"
 #define MODULE_BUILD "$Id: luars232.c 15 2011-02-23 09:02:20Z sp $"
-#define MODULE_COPYRIGHT "Copyright (c) 2009 Petr Stetiar <ynezz@true.cz>, Gaben Ltd."
+#define MODULE_COPYRIGHT "Copyright (c) 2011 Petr Stetiar <ynezz@true.cz>, Gaben Ltd."
 
 static struct {
 	const char *name;
 	unsigned long value;
 } luars232_ulong_consts[] = {
 	/* baudrates */
+	{ "RS232_BAUD_300", RS232_BAUD_300 },
 	{ "RS232_BAUD_2400", RS232_BAUD_2400 },
 	{ "RS232_BAUD_4800", RS232_BAUD_4800 },
 	{ "RS232_BAUD_9600", RS232_BAUD_9600 },
@@ -55,6 +50,7 @@ static struct {
 	{ "RS232_BAUD_38400", RS232_BAUD_38400 },
 	{ "RS232_BAUD_57600", RS232_BAUD_57600 },
 	{ "RS232_BAUD_115200", RS232_BAUD_115200 },
+	{ "RS232_BAUD_460800", RS232_BAUD_460800 },
 	/* databits */
 	{ "RS232_DATA_5", RS232_DATA_5 },
 	{ "RS232_DATA_6", RS232_DATA_6 },
@@ -194,7 +190,7 @@ static int lua_port_read(lua_State *L)
 	DBG("ret=%d hex='%s' bytes_read=%d\n",
 	    ret, rs232_hex_dump(data, bytes_read), bytes_read);
 
-	lua_pushinteger(L, RS232_ERR_NOERROR);
+	lua_pushinteger(L, ret);
 	if (bytes_read > 0)
 		lua_pushlstring(L, (char *) data, bytes_read);
 	else
@@ -312,6 +308,13 @@ static int lua_port_device(lua_State *L)
 	return 1;
 }
 
+static int lua_port_fd(lua_State *L)
+{
+	struct rs232_port_t *p = (struct rs232_port_t*) luaL_checkudata(L, 1, MODULE_NAMESPACE);
+	lua_pushinteger(L, rs232_fd(p));
+	return 1;
+}
+
 /*
  * print(port:error_tostring(error))
  */
@@ -388,6 +391,7 @@ static luaL_reg port_methods[] = {
 	{ "close", lua_port_close },
 	{ "flush", lua_port_flush },
 	{ "device", lua_port_device },
+	{ "fd", lua_port_fd },
 	/* baud */
 	{ "baud_rate", lua_port_get_baud },
 	{ "baud_rate_tostring", lua_port_get_strbaud },

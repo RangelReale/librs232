@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
+ * Copyright (c) 2011 Petr Stetiar <ynezz@true.cz>, Gaben Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,34 +31,53 @@
 
 #define RS232_STRLEN 512
 #define RS232_STRLEN_DEVICE 30
-#define RS232_PORT_LINUX "/dev/ttyS0"
+
+#ifdef __linux__
+#define RS232_PORT_POSIX "/dev/ttyS0"
+#else
+#define RS232_PORT_POSIX "/dev/cua00"
+#endif /* __linux__ */
+
 #define RS232_PORT_WIN32 "COM1"
 
 #if defined(WIN32) || defined(UNDER_CE)
-#pragma warning(disable:4996)
-#define snprintf _snprintf
+ #include "librs232/rs232_windows.h"
+ #pragma warning(disable:4996)
+ #define snprintf _snprintf
+#else
+ #include "librs232/rs232_posix.h"
 #endif
 
 #ifdef RS232_DEBUG
-#define DBG(x, ...) \
-{ \
-	time_t now = time(NULL); \
-	struct tm* t = localtime(&now); \
-	fprintf(stderr, "[%02d:%02d:%02d] %s(%d):%s: " x, t->tm_hour, t->tm_min, \
-		t->tm_sec,  __FILE__, __LINE__, __FUNCTION__, ## __VA_ARGS__); \
-}
-
 const char* rs232_hex_dump(const void *data, unsigned int len);
 const char* rs232_ascii_dump(const void *data, unsigned int len);
+
+ #if defined(WIN32) || defined(UNDER_CE)
+  #include <windows.h>
+  #define DBG(x, ...) \
+ 		{ \
+			SYSTEMTIME t; \
+			GetLocalTime(&t); \
+			fprintf(stderr, "[%02d:%02d:%02d.%03d] %s(%d):%s: " x, t.wHour, t.wMinute, \
+				t.wSecond, t.wMilliseconds,  __FILE__, __LINE__, __FUNCTION__, ## __VA_ARGS__); \
+		}
+ #else
+  #define DBG(x, ...) \
+		{ \
+			time_t now = time(NULL); \
+			struct tm* t = localtime(&now); \
+			fprintf(stderr, "[%02d:%02d:%02d] %s(%d):%s: " x, t->tm_hour, t->tm_min, \
+				t->tm_sec,  __FILE__, __LINE__, __FUNCTION__, ## __VA_ARGS__); \
+		}
+ #endif /* #if defined(WIN32) || defined(UNDER_CE) */
 #else
-#define DBG(x, ...)
-#define rs232_hex_dump(x, y)
-#define rs232_ascii_dump(x, y)
-#endif
-
-
+ #define DBG(x, ...)
+ #define rs232_hex_dump(x, y)
+ #define rs232_ascii_dump(x, y)
+#endif /* RS232_DEBUG */
 
 enum rs232_baud_e {
+	RS232_BAUD_300,
 	RS232_BAUD_2400,
 	RS232_BAUD_4800,
 	RS232_BAUD_9600,
@@ -66,6 +85,7 @@ enum rs232_baud_e {
 	RS232_BAUD_38400,
 	RS232_BAUD_57600,
 	RS232_BAUD_115200,
+	RS232_BAUD_460800,
 	RS232_BAUD_MAX
 };
 
@@ -191,5 +211,6 @@ RS232_LIB const char * rs232_strstop(unsigned int stop);
 RS232_LIB const char * rs232_strflow(unsigned int flow);
 RS232_LIB const char * rs232_strdtr(unsigned int dtr);
 RS232_LIB const char * rs232_strrts(unsigned int rts);
+RS232_LIB unsigned int rs232_fd(struct rs232_port_t *p);
 
 #endif /* __LIBRS232_H__ */
