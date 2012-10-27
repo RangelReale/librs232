@@ -1,7 +1,7 @@
 --- This file is part of LuaDist project
 
 name = "librs232"
-version = "1.0.1"
+version = "1.0.3"
 
 desc = "Multiplatform library for serial communications over RS-232 (serial port)"
 author = "Petr Stetiar"
