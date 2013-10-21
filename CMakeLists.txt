@@ -58,7 +58,7 @@ endif ( )
 find_package ( Lua )
 if ( LUA_FOUND )
   install_lua_module ( luars232 bindings/lua/luars232.c src/resource_lua.rc LINK rs232 )
-  set_target_properties ( luars232 PROPERTIES LINK_FLAGS -nostartfiles )
+  #set_target_properties ( luars232 PROPERTIES LINK_FLAGS -nostartfiles )
   # note: Makefile.am versions this (VERSION/SOVERSION) too, which creates symlinks, but I'll omit that.
 
   # This takes way too long to run.
