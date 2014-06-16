@@ -396,7 +396,7 @@ rs232_open(struct rs232_port_t *p)
 	if (wname == NULL)
 		return RS232_ERR_UNKNOWN;
 
-	wx->fd = CreateFile(wname, GENERIC_READ | GENERIC_WRITE,
+	wx->fd = CreateFileW(wname, GENERIC_READ | GENERIC_WRITE,	// Force Unicode version of CreateFile() -hg
 			    FILE_SHARE_READ | FILE_SHARE_WRITE,
 			    NULL, OPEN_EXISTING, 0, NULL);
 
