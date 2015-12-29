@@ -4,11 +4,13 @@
 # For details see the COPYRIGHT file distributed with LuaDist.
 # Please note that the package source code is licensed under its own license.
 
-project ( librs232 C )
+project ( librs232 C CXX )
 cmake_minimum_required ( VERSION 2.6 )
 include ( cmake/dist.cmake )
 include ( lua )
 install_header ( include/librs232/rs232.h include/librs232/rs232_posix.h INTO librs232 )
+
+option ( LUA_CXX "Compile as CXX instead of C." OFF )
 
 # LIBVERSION 0:1:0
 set ( SOVERSION 0 )
@@ -29,6 +31,12 @@ else ( )
 endif ( )
 
 add_library ( rs232 src/rs232.c ${SRCS} )
+if (LUA_CXX)
+  SET_SOURCE_FILES_PROPERTIES( src/rs232.c ${SRCS} PROPERTIES LANGUAGE CXX )
+  if ( WIN32 OR CYGWIN )
+    SET_SOURCE_FILES_PROPERTIES( src/resource.rc PROPERTIES LANGUAGE DEFAULT )
+  endif()
+endif()
 #unused: set_target_properties ( rs232 PROPERTIES VERSION ${VERSION} )
 #unused: set_target_properties ( rs232 PROPERTIES SOVERSION ${SOVERSION})
 #set_target_properties ( rs232 PROPERTIES LINK_FLAGS -nostartfiles ) # is this really useful, other than saving nine bytes?
@@ -36,6 +44,10 @@ install_library ( rs232 )
 
 if ( CMAKE_BUILD_TYPE STREQUAL Debug )
   add_executable ( rs232_test src/rs232_test.c )
+  if (LUA_CXX)
+    SET_SOURCE_FILES_PROPERTIES( src/rs232_test.c PROPERTIES LANGUAGE CXX )
+  endif()
+  
   target_link_libraries ( rs232_test rs232 )
   install_executable ( rs232_test )
   if ( NOT SKIP_TESTING )
@@ -58,6 +70,9 @@ endif ( )
 find_package ( Lua )
 if ( LUA_FOUND )
   install_lua_module ( luars232 bindings/lua/luars232.c src/resource_lua.rc LINK rs232 )
+  if (LUA_CXX)
+    SET_SOURCE_FILES_PROPERTIES( bindings/lua/luars232.c PROPERTIES LANGUAGE CXX )
+  endif() 
   #set_target_properties ( luars232 PROPERTIES LINK_FLAGS -nostartfiles )
   # note: Makefile.am versions this (VERSION/SOVERSION) too, which creates symlinks, but I'll omit that.
 
